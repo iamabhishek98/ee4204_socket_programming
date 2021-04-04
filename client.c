@@ -116,14 +116,14 @@ float str_cli(FILE *fp, int sockfd, struct sockaddr *addr, int addrlen)
 		}
 		ci += slen;
 	}
-	// int len = sizeof (struct sockaddr_in);
-	// if ((n= recvfrom(sockfd, &ack, 2, 0, (struct sockaddr *)&addr,&len))==-1)                                   //receive the ack
-	// {
-	// 	printf("error when receiving\n");
-	// 	exit(1);
-	// }
-	// if (ack.num != 1|| ack.len != 0)
-	// 	printf("error in transmission\n");
+	int len = sizeof (struct sockaddr_in);
+	if ((n= recvfrom(sockfd, &ack, 2, 0, (struct sockaddr *)&addr,&len))==-1)                                   //receive the ack
+	{
+		printf("error when receiving\n");
+		exit(1);
+	}
+	if (ack.num != 1|| ack.len != 0)
+		printf("error in transmission\n");
 	
 	
 	// gettimeofday(&recvt, NULL);

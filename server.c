@@ -78,7 +78,7 @@ void str_ser(int sockfd)
 	int end, n = 0;
 	long lseek=0;
 	end = 0;
-	struct sockaddr_in addr;
+	struct sockaddr_in client;
 
 	int len = sizeof (struct sockaddr_in);
 	
@@ -87,7 +87,7 @@ void str_ser(int sockfd)
 	while(!end)
 	{
 		
-		if ((n= recvfrom(sockfd, &recvs, DATALEN, 0, (struct sockaddr *)&addr, &len))==-1)                                   //receive the packet
+		if ((n= recvfrom(sockfd, &recvs, DATALEN, 0, (struct sockaddr *)&client, &len))==-1)                                   //receive the packet
 		{
 			printf("error when receiving\n");
 			exit(1);
@@ -100,13 +100,13 @@ void str_ser(int sockfd)
 		memcpy((buf+lseek), recvs, n);
 		lseek += n;
 	}
-	// ack.num = 1;
-	// ack.len = 0;
-	// if ((n = sendto(sockfd, &ack, 2, 0, addr, addrlen))==-1)
-	// {
-	// 		printf("send error!");								//send the ack
-	// 		exit(1);
-	// }
+	ack.num = 1;
+	ack.len = 0;
+	if ((n = sendto(sockfd, &ack, 2, 0, (struct sockaddr *)&client, len))==-1)
+	{
+			printf("send error!");								//send the ack
+			exit(1);
+	}
 	if ((fp = fopen ("myUDPreceive.txt","wt")) == NULL)
 	{
 		printf("File doesn't exit\n");
