@@ -19,12 +19,12 @@ int main(int argc, char **argv)
 	FILE *fp;
 
 	if (argc != 2) {
-		printf("parameters not match");
+		printf("parameters not match\n");
 	}
 
 	sh = gethostbyname(argv[1]);	                                       //get host's information
 	if (sh == NULL) {
-		printf("error when gethostby name");
+		printf("error when gethostby name\n");
 		exit(0);
 	}
 
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 	sockfd = socket(AF_INET, SOCK_DGRAM, 0);                           //create the socket
 	if (sockfd <0)
 	{
-		printf("error in socket");
+		printf("error in socket\n");
 		exit(1);
 	}
 	ser_addr.sin_family = AF_INET;                                                      
@@ -111,7 +111,7 @@ float str_cli(FILE *fp, int sockfd, struct sockaddr *addr, int addrlen)
 		memcpy(sends, (buf+ci), slen);
 		n = sendto(sockfd, &sends, slen, 0, addr, addrlen);
 		if(n == -1) {
-			printf("send error!");								//send the data
+			printf("send error!\n");								//send the data
 			exit(1);
 		}
 		ci += slen;

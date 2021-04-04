@@ -104,7 +104,7 @@ void str_ser(int sockfd)
 	ack.len = 0;
 	if ((n = sendto(sockfd, &ack, 2, 0, (struct sockaddr *)&client, len))==-1)
 	{
-			printf("send error!");								//send the ack
+			printf("send error!\n");								//send the ack
 			exit(1);
 	}
 	if ((fp = fopen ("myUDPreceive.txt","wt")) == NULL)
