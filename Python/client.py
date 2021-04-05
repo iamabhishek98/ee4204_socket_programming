@@ -1,4 +1,5 @@
 import socket, os
+from time import sleep
 
 HOST = '127.0.0.1'
 PORT = 12345
@@ -17,22 +18,28 @@ def sendFile(s):
         print('Received ACK for file size')
 
     sentSize = 0
-    currCount = 1
+    currCount = 0
+    batchLimit = 1
     batchCount = 0
+    batchBuffer = []
     fileToSend = open(FILE_PATH, "rb")
     while sentSize < fileSize:
-        # currCount += 1
+        # sleep(1)
+        currCount += 1
         batchCount += 1
         datagram = fileToSend.read(DATALEN)
+        batchBuffer.append(datagram)
         s.sendto(datagram, 0, addr)
         print("Sent datagram", currCount)
         sentSize += len(datagram)
-        if batchCount == currCount:
+        # print('buffer', batchBuffer)
+        if batchCount == batchLimit:
             ack, addr = s.recvfrom(1024)
             if ack == ACK:
-                print("Received ACK for datagram", currCount)
+                print("Received ACK for batch", batchLimit)
             batchCount = 0
-            currCount += 1
+            batchBuffer = []
+            batchLimit += 1
 
     fileToSend.close()
 
