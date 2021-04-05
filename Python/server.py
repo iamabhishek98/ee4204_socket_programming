@@ -27,20 +27,29 @@ def recvFile(s):
     currCount = 0
     batchLimit = 1
     batchCount = 0
-    # send file in short data unit
+    batchBuffer = []
+    # receive file in short data units
     while receivedSize < fileSize:
         currCount += 1
         batchCount += 1
         datagram, addr = s.recvfrom(DATALEN)
         print("Received datagram", currCount)
         datagramSize = len(datagram)
-        receivedFile.write(datagram)
+        batchBuffer.append(datagram)
         receivedSize += datagramSize
         if batchCount == batchLimit:
+            # if batchLimit == 5: 
+            #     s.sendto(bytes(NACK+str(batchLimit), 'utf-8'), 0, addr)
+                # batch
+
+            # else:
             s.sendto(bytes(ACK+str(batchLimit),'utf-8'), 0, addr)
             print("Sent ACK for batch", batchLimit)
             batchCount = 0
             batchLimit += 1
+            for i in batchBuffer:
+                receivedFile.write(i)
+            batchBuffer = []
 
     receivedFile.close()
 
