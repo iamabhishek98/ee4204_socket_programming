@@ -5,8 +5,8 @@ HOST = '127.0.0.1'
 PORT = 12345
 FILE_PATH = 'myfile.txt'
 DATALEN = 500
-ACK = b'A'
-NACK = b'N'
+ACK = 'A'
+NACK = 'N'
 
 s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -22,24 +22,32 @@ def sendFile(s):
     batchLimit = 1
     batchCount = 0
     batchBuffer = []
+    prevACKStatus = True
     fileToSend = open(FILE_PATH, "rb")
     while sentSize < fileSize:
-        # sleep(1)
-        currCount += 1
-        batchCount += 1
-        datagram = fileToSend.read(DATALEN)
-        batchBuffer.append(datagram)
-        s.sendto(datagram, 0, addr)
-        print("Sent datagram", currCount)
-        sentSize += len(datagram)
-        # print('buffer', batchBuffer)
+        if prevACKStatus:
+            # if sendStatus
+            # sleep(1)
+            currCount += 1
+            batchCount += 1
+            datagram = fileToSend.read(DATALEN)
+            batchBuffer.append(datagram)
+            s.sendto(datagram, 0, addr)
+            print("Sent datagram", currCount)
+            sentSize += len(datagram)
+            # print('buffer', batchBuffer)
         if batchCount == batchLimit:
-            ack, addr = s.recvfrom(1024)
-            if ack == ACK:
-                print("Received ACK for batch", batchLimit)
-            batchCount = 0
-            batchBuffer = []
-            batchLimit += 1
+            prevACKStatus = False
+            ack_datagram, addr = s.recvfrom(1024)
+            sleep(0.1)
+            # print (ack[0],ack[0] == ACK)
+            ack = ack_datagram.decode('utf-8')
+            if ack[0] == ACK and int(ack[1:]) == batchLimit:
+                print("Received", ack)
+                prevACKStatus = True
+                batchCount = 0
+                batchBuffer = []
+                batchLimit += 1
 
     fileToSend.close()
 

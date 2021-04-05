@@ -2,8 +2,8 @@ import socket, sys
 
 HOST = '127.0.0.1'
 PORT = 12345
-ACK = b'A'
-NACK = b'N'
+ACK = 'A'
+NACK = 'N'
 DATALEN = 500
 RECEIVED_FILE_PATH = 'myUDPreceive.txt'
 
@@ -17,7 +17,7 @@ def recvFile(s):
         # if file_size < 0:
         #     raise Exception("file size cannot be negative")
         print('File size is',fileSize)
-        s.sendto(ACK, 0, addr)
+        s.sendto(bytes(ACK,'utf-8'), 0, addr)
         print("Sent ACK for file size")
         fileSizeReceivedStatus = True
     
@@ -37,7 +37,7 @@ def recvFile(s):
         receivedFile.write(datagram)
         receivedSize += datagramSize
         if batchCount == batchLimit:
-            s.sendto(ACK, 0, addr)
+            s.sendto(bytes(ACK+str(batchLimit),'utf-8'), 0, addr)
             print("Sent ACK for batch", batchLimit)
             batchCount = 0
             batchLimit += 1
