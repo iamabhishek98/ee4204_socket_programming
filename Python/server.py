@@ -1,4 +1,5 @@
 import socket, sys
+from time import sleep
 
 HOST = '127.0.0.1'
 PORT = 12345
@@ -43,6 +44,7 @@ def recvFile(s):
                 # batch
 
             # else:
+            # sleep(0.5)
             s.sendto(bytes(ACK+str(batchLimit),'utf-8'), 0, addr)
             print("Sent ACK for batch", batchLimit)
             batchCount = 0

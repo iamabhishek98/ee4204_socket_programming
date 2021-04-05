@@ -44,6 +44,8 @@ def sendFile(s):
             sentSize += len(datagram)
             # print('buffer', batchBuffer)
         if batchCount == batchLimit:
+            s.settimeout(1)
+            
             print(len(batchBuffer))
             prevACKStatus = False
             ack_datagram, addr = s.recvfrom(1024)
