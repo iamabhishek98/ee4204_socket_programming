@@ -24,22 +24,17 @@ def recvFile(s):
 
     receivedFile = open(RECEIVED_FILE_PATH, "wb")
     receivedSize = 0
-    currCount = 1
-    batchCount = 0
-    # send file in short data unit
+    currCount = 0
+    # send file in short datalen
     while receivedSize < fileSize:
-        # currCount += 1
-        batchCount += 1
+        currCount += 1
         datagram, addr = s.recvfrom(DATALEN)
         print("Received datagram", currCount)
         datagramSize = len(datagram)
         receivedFile.write(datagram)
+        s.sendto(ACK, 0, addr)
+        print("Sent ACK for datagram", currCount)
         receivedSize += datagramSize
-        if batchCount == currCount:
-            s.sendto(ACK, 0, addr)
-            print("Sent ACK for datagram", currCount)
-            batchCount = 0
-            currCount += 1
 
     receivedFile.close()
 
