@@ -1,71 +1,58 @@
-import socket, os
-from time import sleep
-
-HOST = '127.0.0.1'
-PORT = 12345
-FILE_PATH = 'myfile.txt'
-DATALEN = 500
-ACK = 'A'
-NACK = 'N'
-
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-def fillBuffer(fileToSend, batchLimit):
-    buffer = []
-    for i in range(batchLimit):
-        buffer.append(fileToSend.read(DATALEN))
-    return buffer
+import header as h
 
 def sendFile(s):
-    fileSize = os.path.getsize(FILE_PATH)
-    s.sendto((str(fileSize).encode('utf-8')), 0,(HOST,PORT))
-    resp, addr = s.recvfrom(1024)
-    if resp == ACK:
+    fileSize = h.os.path.getsize(h.FILE_PATH)
+    s.sendto((str(fileSize).encode('utf-8')), 0,(h.HOST,h.PORT))
+    ack, addr = s.recvfrom(1024)
+    if ack.decode('utf-8') == h.ACK:
         print('Received ACK for file size')
-
+    else:
+        raise Exception('Error in receiving ACK for file size!')
+    
     sentSize = 0
     currCount = 0
     batchLimit = 1
     batchCount = 0
     prevACKStatus = True
-    fileToSend = open(FILE_PATH, "rb")
-    batchBuffer = fillBuffer(fileToSend, batchLimit)
-    # send file in short data units
+    fileToSend = open(h.FILE_PATH, "rb")
+    tStart = h.time()
     while sentSize < fileSize:
-        # print(batchBuffer)
         if prevACKStatus:
-            # if sendStatus
-            # sleep(1)
             currCount += 1
-            datagram = batchBuffer[batchCount]
-            s.sendto(datagram, 0, addr)
-            print("Sent datagram", currCount)
             batchCount += 1
+            datagram = fileToSend.read(h.DATALEN)
+            s.sendto(datagram, 0, addr)
+            print("Sent datagram {}".format(currCount))
             sentSize += len(datagram)
-            # print('buffer', batchBuffer)
         if batchCount == batchLimit:
-            s.settimeout(1)
-            
-            print(len(batchBuffer))
             prevACKStatus = False
             ack_datagram, addr = s.recvfrom(1024)
-            sleep(0.1)
-
-            resp = ack_datagram.decode('utf-8')
-            if resp[0] == ACK and int(resp[1:]) == batchLimit:
-                print("Received ACK:", resp)
+            # sleep(0.1)
+            ack = ack_datagram.decode('utf-8')
+            if ack[0] == h.ACK and int(ack[1:]) == batchLimit:
+                print("Received acknowledgement {}".format(ack))
                 prevACKStatus = True
                 batchCount = 0
                 batchLimit += 1
-                batchBuffer = fillBuffer(fileToSend, batchLimit)
+    
+    if sentSize != fileSize:
+        raise Exception('Error in sending file!')
 
-            elif resp[0] == NACK:
-                print("Received NACK:", resp)
-                prevACKStatus = True 
-                batchCount = 0
-                print("Resending batch", batchLimit)
+    if batchCount < batchLimit:
+        ack_datagram, addr = s.recvfrom(1024)
+        # sleep(0.1)
+        ack = ack_datagram.decode('utf-8')
+        if ack[0] == h.ACK and int(ack[1:]) == batchLimit:
+            print("Received acknowledgement {}".format(ack))
 
+    print('File successfully sent!\n')
+    tEnd = (h.time() - tStart)*1000
+    print('Message Transfer Time: {} ms'.format(tEnd))
+    print('Total File Size: {} bytes'.format(fileSize))
+    print('Packet length: {} bytes'.format(h.DATALEN))
+    print('Data rate: {} (Kbytes/s)'.format(fileSize/tEnd))
     fileToSend.close()
 
 if __name__ == "__main__":
+    s = h.socket.socket(h.socket.AF_INET, h.socket.SOCK_DGRAM)
     sendFile(s)
