@@ -1,18 +1,19 @@
 import header as h
 
 def recvFile(s):
-    fileSizeReceivedStatus = False
+
+    file_size_bytes, addr = s.recvfrom(1024)
     
     # send file size
-    while not fileSizeReceivedStatus:
-        file_size_bytes, addr = s.recvfrom(1024)
+    try:
         fileSize = int(file_size_bytes.decode('utf-8'))
         # if file_size < 0:
         #     raise Exception("file size cannot be negative")
         print('File size is {}'.format(fileSize))
         s.sendto(bytes(h.ACK,'utf-8'), 0, addr)
         print("Sent ACK for file size")
-        fileSizeReceivedStatus = True
+    except:
+        raise Exception('File size not received properly!')
     
 
     receivedFile = open(h.RECEIVED_FILE_PATH, "wb")
@@ -44,7 +45,7 @@ if __name__ == "__main__":
         print('Socket binded to {}:{}'.format(h.HOST,h.PORT))
         try:
             recvFile(s)
-        except h.socket.timeout:
-            print('Socket timed out. Error in receiving file!')
+        except Exception as e:
+            print('Error in receiving file!', e)
         s.close()
         print('Socket closed')

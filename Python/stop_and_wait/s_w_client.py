@@ -34,7 +34,7 @@ def sendFile(s):
     print('Message Transfer Time: {} ms'.format(round(ttime,3)))
     print('Total File Size: {} bytes'.format(fileSize))
     print('Packet length: {} bytes'.format(h.DATALEN))
-    print('Data rate: {} (Kbytes/s)'.format(round(fileSize/ttime),3))
+    print('Data rate: {} (Kbytes/s)'.format(round(fileSize/ttime,3)))
     fileToSend.close()
 
 if __name__ == "__main__":

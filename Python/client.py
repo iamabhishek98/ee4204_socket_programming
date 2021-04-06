@@ -29,16 +29,18 @@ def sendFile(s):
             ack_datagram, addr = s.recvfrom(1024)
             # sleep(0.1)
             ack = ack_datagram.decode('utf-8')
-            if ack[0] == h.ACK and int(ack[1:]) == batchLimit:
-                print("Received acknowledgement {}".format(ack))
-                prevACKStatus = True
-                batchCount = 0
-                batchLimit += 1
+            if ack[0] == h.ACK:
+                if int(ack[1:]) == batchLimit:
+                    print("Received acknowledgement {}".format(ack))
+                    prevACKStatus = True
+                    batchCount = 0
+                    batchLimit += 1
+                else: raise Exception('Error in receiving acknowledgement')
     
     if sentSize != fileSize:
-        raise Exception('Error in sending file!')
+        raise Exception('Sent file size != Expected file size')
 
-    if batchCount < batchLimit:
+    if batchCount and batchCount < batchLimit:
         ack_datagram, addr = s.recvfrom(1024)
         # sleep(0.1)
         ack = ack_datagram.decode('utf-8')
@@ -47,10 +49,10 @@ def sendFile(s):
 
     print('File successfully sent!\n')
     ttime = (h.time() - tStart)*1000
-    print('Message Transfer Time: {} ms'.format(ttime))
+    print('Message Transfer Time: {} ms'.format(round(ttime,3)))
     print('Total File Size: {} bytes'.format(fileSize))
     print('Packet length: {} bytes'.format(h.DATALEN))
-    print('Data rate: {} (Kbytes/s)'.format(fileSize/ttime))
+    print('Data rate: {} (Kbytes/s)'.format(round(fileSize/ttime,3)))
     fileToSend.close()
 
 if __name__ == "__main__":
