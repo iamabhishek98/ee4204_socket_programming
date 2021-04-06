@@ -1,11 +1,4 @@
-import socket, sys
-
-HOST = '127.0.0.1'
-PORT = 12345
-ACK = b'A'
-NACK = b'N'
-DATALEN = 500
-RECEIVED_FILE_PATH = 'myUDPreceive.txt'
+import header as h
 
 def recvFile(s):
     fileSizeReceivedStatus = False
@@ -16,38 +9,42 @@ def recvFile(s):
         fileSize = int(file_size_bytes.decode('utf-8'))
         # if file_size < 0:
         #     raise Exception("file size cannot be negative")
-        print('File size is',fileSize)
-        s.sendto(ACK, 0, addr)
+        print('File size is {}'.format(fileSize))
+        s.sendto(bytes(h.ACK,'utf-8'), 0, addr)
         print("Sent ACK for file size")
         fileSizeReceivedStatus = True
     
 
-    receivedFile = open(RECEIVED_FILE_PATH, "wb")
+    receivedFile = open(h.RECEIVED_FILE_PATH, "wb")
     receivedSize = 0
-    currCount = 0
+    currCount = 1
+    s.settimeout(1)
     # send file in short datalen
     while receivedSize < fileSize:
-        currCount += 1
-        datagram, addr = s.recvfrom(DATALEN)
-        print("Received datagram", currCount)
+        datagram, addr = s.recvfrom(h.DATALEN)
+        print("Received datagram {}".format(currCount))
         datagramSize = len(datagram)
         receivedFile.write(datagram)
-        s.sendto(ACK, 0, addr)
-        print("Sent ACK for datagram", currCount)
+        s.sendto(bytes(h.ACK+str(currCount),'utf-8'), 0, addr)
+        print("Sent ACK for datagram {}".format(currCount))
         receivedSize += datagramSize
-
+        currCount += 1
+    
+    print('File successfully received!')
     receivedFile.close()
 
 if __name__ == "__main__":
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    except:
-        print('Failed to create socket! Exiting...')
-        sys.exit()
-
-    s.bind((HOST, PORT))
-    print('Socket binded to '+str(HOST)+':'+str(PORT))
-
-    recvFile(s)
-
-    s.close()
+    while True:
+        try:
+            s = h.socket.socket(h.socket.AF_INET, h.socket.SOCK_DGRAM)
+        except:
+            print('Failed to create socket! Exiting...')
+            h.sys.exit()
+        s.bind((h.HOST, h.PORT))
+        print('Socket binded to {}:{}'.format(h.HOST,h.PORT))
+        try:
+            recvFile(s)
+        except h.socket.timeout:
+            print('Socket timed out. Error in receiving file!')
+        s.close()
+        print('Socket closed')

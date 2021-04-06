@@ -46,11 +46,11 @@ def sendFile(s):
             print("Received acknowledgement {}".format(ack))
 
     print('File successfully sent!\n')
-    tEnd = (h.time() - tStart)*1000
-    print('Message Transfer Time: {} ms'.format(tEnd))
+    ttime = (h.time() - tStart)*1000
+    print('Message Transfer Time: {} ms'.format(ttime))
     print('Total File Size: {} bytes'.format(fileSize))
     print('Packet length: {} bytes'.format(h.DATALEN))
-    print('Data rate: {} (Kbytes/s)'.format(fileSize/tEnd))
+    print('Data rate: {} (Kbytes/s)'.format(fileSize/ttime))
     fileToSend.close()
 
 if __name__ == "__main__":
