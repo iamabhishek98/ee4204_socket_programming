@@ -15,6 +15,7 @@ def recvFile(s):
     receivedSize = 0
     currCount = 0
     batchLimit = 1
+    batchNo = 1
     batchCount = 0
     s.settimeout(1)
     # receive file in short data unit
@@ -27,10 +28,12 @@ def recvFile(s):
         receivedFile.write(datagram)
         receivedSize += datagramSize
         if batchCount == batchLimit:
-            s.sendto(bytes(h.ACK+str(batchLimit),'utf-8'), 0, addr)
-            print("Sent ACK for batch {}".format(batchLimit))
+            s.sendto(bytes(h.ACK+str(batchNo),'utf-8'), 0, addr)
+            print("Sent ACK for batch {}".format(batchNo))
             batchCount = 0
+            batchNo += 1
             batchLimit += 1
+            if batchLimit > 3: batchLimit = batchLimit % 3
 
     if receivedSize != fileSize:
         raise Exception('Received file size != Expected file size')

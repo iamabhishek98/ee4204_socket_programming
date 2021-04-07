@@ -12,6 +12,7 @@ def sendFile(s):
     sentSize = 0
     currCount = 0
     batchLimit = 1
+    batchNo = 1
     batchCount = 0
     prevACKStatus = True
     fileToSend = open(h.FILE_PATH, "rb")
@@ -30,11 +31,15 @@ def sendFile(s):
             # sleep(0.1)
             ack = ack_datagram.decode('utf-8')
             if ack[0] == h.ACK:
-                if int(ack[1:]) == batchLimit:
+                if int(ack[1:]) == batchNo:
                     print("Received acknowledgement {}".format(ack))
                     prevACKStatus = True
                     batchCount = 0
+                    batchNo += 1
                     batchLimit += 1
+                    if batchLimit > 3: batchLimit = batchLimit % 3
+
+                    # batchLimit = batchLimit%3
                 else: raise Exception('Error in receiving acknowledgement')
     
     if sentSize != fileSize:
